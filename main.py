@@ -16,8 +16,11 @@ load_dotenv()
 
 USER = "Friend"
 END_WORDS = ["quit", "stop", "bye"]
+SEARCH_WORDS = ["look up", "google"]
 JOKES_URL = "https://official-joke-api.appspot.com/jokes/random"
 USER_AGENT = os.getenv("USER_AGENT")
+SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
+CSE_KEY = os.getenv("CSE_KEY")
 
 
 def welcome():
@@ -87,6 +90,25 @@ def check_weather(command: str):
     print("Wind:", results["wind"])
 
 
+def google_search():
+    """
+    Prints the first ten Google search results for the inputted
+    query using Google Custom Search Engine API.
+    """
+    query = input("What would you like to search for?\n")
+    url = f"https://www.googleapis.com/customsearch/v1?key={CSE_KEY}&cx={SEARCH_ENGINE_ID}&q={query}&start=20"
+    response = requests.get(url).json()
+    search_results = response.get("items")
+    for i, search_results in enumerate(search_results, start=1):
+        title = search_results.get("title")
+        snippet = search_results.get("snippet")
+        link = search_results.get("link")
+        print("=" * 10, f"Result #{i}", "=" * 10)
+        print("Title:", title)
+        print("Description:", snippet)
+        print("URL:", link, "\n")
+
+
 if __name__ == "__main__":
     welcome()
 
@@ -101,6 +123,8 @@ if __name__ == "__main__":
             tell_joke()
         elif "weather" in command:
             check_weather(command)
+        elif any(word in command for word in SEARCH_WORDS):
+            google_search()
         elif any(word in command for word in END_WORDS):
             print(f"Goodbye, {USER}!")
             break
