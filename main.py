@@ -40,6 +40,10 @@ def get_time():
 
 
 def tell_joke():
+    """
+    Prints a random joke from the Offical Jokes API with a three second pause in between
+    the setup and punchline for comedic effect.
+    """
     joke = requests.get(JOKES_URL)
     joke_dict = json.loads(joke.text)
     print(joke_dict["setup"])
