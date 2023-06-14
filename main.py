@@ -40,7 +40,13 @@ def get_time():
 
 
 def tell_joke():
-    response = requests.get(JOKES_URL)
+    joke = requests.get(JOKES_URL)
+    joke_dict = json.loads(joke.text)
+    print(joke_dict["setup"])
+    for i in range(3):
+        print("...")
+        time.sleep(1)
+    print(joke_dict["punchline"])
 
 
 if __name__ == "__main__":
@@ -53,6 +59,8 @@ if __name__ == "__main__":
             get_date()
         elif "time" in command:
             get_time()
+        elif "joke" in command:
+            tell_joke()
         elif any(word in command for word in END_WORDS):
             print(f"Goodbye, {USER}!")
             break
