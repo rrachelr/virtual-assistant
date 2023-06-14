@@ -59,13 +59,20 @@ def tell_joke():
 
 
 def check_weather(command: str):
+    """
+    The user's weather related query is searched in Google, and the relevant
+    data is extracted from the result into a dictionary. The weather data is
+    then printed. With this method, the weather location can be included in the
+    command without the need for a second input.
+
+    Args: command (str) -> the user's input that includes the word "weather"
+    """
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
     url = f"https://www.google.com/search?lr=lang_en&ie=UTF-8&q={command}"
     html = session.get(url)
     soup = BeautifulSoup(html.text, "html.parser")
     results = {}
-
     results["region"] = soup.find("span", attrs={"class": "BBwThe"}).text
     results["temp"] = soup.find("span", attrs={"id": "wob_tm"}).text
     results["weather"] = soup.find("span", attrs={"id": "wob_dc"}).text
