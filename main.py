@@ -5,14 +5,19 @@ Description: This program runs the virtual assistant "Aida" who will
 execute tasks according to the user's input.
 """
 from datetime import date
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+import os
 import time
 import requests
 import json
 
+load_dotenv()
 
 USER = "Friend"
 END_WORDS = ["quit", "stop", "bye"]
 JOKES_URL = "https://official-joke-api.appspot.com/jokes/random"
+USER_AGENT = os.getenv("USER_AGENT")
 
 
 def welcome():
@@ -44,13 +49,35 @@ def tell_joke():
     Prints a random joke from the Offical Jokes API with a three second pause in between
     the setup and punchline for comedic effect.
     """
-    joke = requests.get(JOKES_URL)
-    joke_dict = json.loads(joke.text)
-    print(joke_dict["setup"])
+    response = requests.get(JOKES_URL)
+    response_dict = json.loads(response.text)
+    print(response_dict["setup"])
     for i in range(3):
         print("...")
         time.sleep(1)
-    print(joke_dict["punchline"])
+    print(response_dict["punchline"])
+
+
+def check_weather(command: str):
+    session = requests.Session()
+    session.headers["User-Agent"] = USER_AGENT
+    url = f"https://www.google.com/search?lr=lang_en&ie=UTF-8&q={command}"
+    html = session.get(url)
+    soup = BeautifulSoup(html.text, "html.parser")
+    results = {}
+
+    results["region"] = soup.find("span", attrs={"class": "BBwThe"}).text
+    results["temp"] = soup.find("span", attrs={"id": "wob_tm"}).text
+    results["weather"] = soup.find("span", attrs={"id": "wob_dc"}).text
+    results["precipitation"] = soup.find("span", attrs={"id": "wob_pp"}).text
+    results["humidity"] = soup.find("span", attrs={"id": "wob_hm"}).text
+    results["wind"] = soup.find("span", attrs={"id": "wob_ws"}).text
+    print("Current weather in:", results["region"])
+    print("Temperature:", results["temp"])
+    print("Description:", results["weather"])
+    print("Precipitation:", results["precipitation"])
+    print("Humidity:", results["humidity"])
+    print("Wind:", results["wind"])
 
 
 if __name__ == "__main__":
@@ -65,6 +92,8 @@ if __name__ == "__main__":
             get_time()
         elif "joke" in command:
             tell_joke()
+        elif "weather" in command:
+            check_weather(command)
         elif any(word in command for word in END_WORDS):
             print(f"Goodbye, {USER}!")
             break
